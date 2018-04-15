@@ -2,7 +2,7 @@ using System;
 
 namespace Graphiti.Core
 {
-    public sealed class GraphEdge : IEquatable<GraphEdge>
+    public sealed class GraphEdge
     {
         public GraphEdge(string fromNode, string toNode, float weight)
         {
@@ -15,24 +15,19 @@ namespace Graphiti.Core
         public string ToNode { get; private set; }
         public float Weight { get; private set; }
 
-        bool IEquatable<GraphEdge>.Equals(GraphEdge other)
+        public override bool Equals(object obj)
         {
-            if (Object.ReferenceEquals(other, null))
-            {
+            if (obj == null || GetType() != obj.GetType())
                 return false;
-            }
 
-            if (Object.ReferenceEquals(this, other))
-            {
-                return true;
-            }
-
-            if (this.GetType() != other.GetType())
-            {
-                return false;
-            }
+            GraphEdge other = (GraphEdge)obj;
 
             return (FromNode == other.FromNode) && (ToNode == other.ToNode);
+        }
+
+        public override int GetHashCode()
+        {
+            return this.FromNode.GetHashCode() * this.ToNode.GetHashCode();
         }
     }
 }

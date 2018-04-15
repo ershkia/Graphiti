@@ -25,6 +25,11 @@ namespace Graphiti.Core
             m_nodes.AddOrUpdate(node, noNeighbors, (key, value) => noNeighbors);
         }
 
+        public void AddEdge(GraphEdge edge)
+        {
+            AddEdge(edge.FromNode, edge.ToNode, edge.Weight);
+        }
+
         public void AddEdge(string fromNode, string toNode, float weight)
         {
             if (!NodeExists(fromNode))
@@ -36,7 +41,7 @@ namespace Graphiti.Core
             {
                 throw new Exception($"Node: {toNode} does not exist.");
             }
-            
+
             if (fromNode == toNode)
             {
                 throw new Exception("fromNode and toNode cannot be the same.");
