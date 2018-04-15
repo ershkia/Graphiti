@@ -30,6 +30,17 @@ namespace Graphiti.Core
             AddEdge(edge.FromNode, edge.ToNode, edge.Weight);
         }
 
+        public bool TryGetEdge(string from, string to, out GraphEdge edge)
+        {
+            edge = null;
+            if (!NodeExists(from) || !NodeExists(to))
+            {
+                return false;
+            }
+            edge = m_nodes[from].FirstOrDefault(x => x.ToNode == to);
+            return edge != null;
+        }
+
         public void AddEdge(string fromNode, string toNode, float weight)
         {
             if (!NodeExists(fromNode))
