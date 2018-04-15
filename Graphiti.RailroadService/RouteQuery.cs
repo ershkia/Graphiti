@@ -34,16 +34,27 @@ namespace Graphiti.RailroadService
             return distance;
         }
 
-        public IEnumerable<GraphRoute> GetAllRoutes(string from, string to, int? minStops, int? maxStops)
+        public IEnumerable<GraphRoute> GetAllRoutes(string from, string to, int? minStops, int maxStops)
         {
             GraphTraverser traverser = new GraphTraverser(m_map);
-            var allRoutes = traverser.Traverse(from, to);
+            var allRoutes = traverser.Traverse(from, to, maxStops);
             return allRoutes.Where(x =>
             {
                 int stops = x.GetEdgeCount();
-                return (minStops == null || stops >= minStops.Value) &&
-                    (maxStops == null || stops <= maxStops.Value);
+                return (minStops == null || stops >= minStops.Value) && (stops <= maxStops);
             });
+        }
+
+        public GraphRoute GetShortestRoute(string from, string to)
+        {
+            GraphTraverser traverser = new GraphTraverser(m_map);
+            int maxStops = m_map.GetEdges().Count();
+            var allRoutes = traverser.Traverse(from, to, maxStops);
+            
+            if(!allRoutes.Any()){
+                throw new RouteNotFoundException();
+            }
+            return allRoutes.OrderBy(x=>x.GetTotalWeight()).First();
         }
     }
 }

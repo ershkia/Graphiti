@@ -39,14 +39,28 @@ namespace Graphiti.RailroadService.AcceptanceTests
             string from,
             string to,
             int? minStops,
-            int? maxStops,
+            int maxStops,
             int expectedTripCount)
         {
             Graph graph = new GraphLoader().Load(graphSrt);
             RouteQuery routeQuery = new RouteQuery(graph);
+            
             var routes = routeQuery.GetAllRoutes(from, to, minStops, maxStops);
 
             Assert.AreEqual(expectedTripCount, routes.Count());
+        }
+
+        [DataTestMethod]
+        [DataRow("AB5 BC4 CD8 DC8 DE6 AD5 CE2 EB3 AE7", "A", "C", 9)]
+        [DataRow("AB5 BC4 CD8 DC8 DE6 AD5 CE2 EB3 AE7", "B", "B", 9)]
+        public void FindShortestTrip(string graphSrt, string from, string to, float expectedDistance)
+        {
+            Graph graph = new GraphLoader().Load(graphSrt);
+            RouteQuery routeQuery = new RouteQuery(graph);
+            
+            var route = routeQuery.GetShortestRoute(from, to);
+
+            Assert.AreEqual(expectedDistance, route.GetTotalWeight());
         }
     }
 }

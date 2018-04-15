@@ -6,7 +6,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Graphiti.UnitTests
 {
     [TestClass]
-    public class GraphPathFinderTests
+    public class GraphTraverserTest
     {
         [TestMethod]
         public void DirectRoute()
@@ -18,7 +18,7 @@ namespace Graphiti.UnitTests
             graph.AddEdge(edge);
 
             GraphTraverser traverser = new GraphTraverser(graph);
-            var result = traverser.Traverse("A", "B");
+            var result = traverser.Traverse("A", "B", 1);
 
             Assert.AreEqual(1, result.Count());
 
@@ -38,7 +38,7 @@ namespace Graphiti.UnitTests
             graph.AddEdge(bc_edge);
 
             GraphTraverser traverser = new GraphTraverser(graph);
-            var result = traverser.Traverse("A", "C");
+            var result = traverser.Traverse("A", "C", 2);
 
             Assert.AreEqual(1, result.Count());
 
@@ -56,11 +56,34 @@ namespace Graphiti.UnitTests
             graph.AddEdge(ba_edge);
 
             GraphTraverser traverser = new GraphTraverser(graph);
-            var result = traverser.Traverse("A", "A");
+            var result = traverser.Traverse("A", "A", 2);
 
             Assert.AreEqual(1, result.Count());
 
             Assert.AreEqual(new GraphRoute(new[] { ab_edge, ba_edge }), result.First());
+        }
+
+        [TestMethod]
+        public void RespectMaxStops()
+        {
+            Graph graph = new Graph();
+            graph.AddNode("A");
+            graph.AddNode("B");
+            GraphEdge ab_edge = new GraphEdge("A", "B", 1);
+            GraphEdge ba_edge = new GraphEdge("B", "A", 2);
+            graph.AddEdge(ab_edge);
+            graph.AddEdge(ba_edge);
+
+            GraphTraverser traverser = new GraphTraverser(graph);
+            var result = traverser.Traverse("A", "A", 6);
+
+            Assert.AreEqual(3, result.Count());
+            var shortRoute = result.Where(x => x.GetEdgeCount() == 2).FirstOrDefault();
+            var mediumRoute = result.Where(x => x.GetEdgeCount() == 4).FirstOrDefault();
+            var longRoute = result.Where(x => x.GetEdgeCount() == 6).FirstOrDefault();
+            Assert.AreEqual(new GraphRoute(new[] { ab_edge, ba_edge }), shortRoute);
+            Assert.AreEqual(new GraphRoute(new[] { ab_edge, ba_edge, ab_edge, ba_edge }), mediumRoute);
+            Assert.AreEqual(new GraphRoute(new[] { ab_edge, ba_edge, ab_edge, ba_edge, ab_edge, ba_edge }), longRoute);
         }
 
         [TestMethod]
@@ -81,7 +104,7 @@ namespace Graphiti.UnitTests
             graph.AddEdge(ad_edge);
 
             GraphTraverser traverser = new GraphTraverser(graph);
-            var result = traverser.Traverse("A", "D");
+            var result = traverser.Traverse("A", "D", 3);
 
             Assert.AreEqual(2, result.Count());
 
@@ -105,7 +128,7 @@ namespace Graphiti.UnitTests
             graph.AddEdge(ca_edge);
 
             GraphTraverser traverser = new GraphTraverser(graph);
-            var result = traverser.Traverse("A", "C");
+            var result = traverser.Traverse("A", "C", 3);
 
             Assert.AreEqual(0, result.Count());
         }

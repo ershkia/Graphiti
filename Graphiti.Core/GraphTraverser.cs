@@ -13,7 +13,7 @@ namespace Graphiti.Core
         {
             m_graph = graph;
         }
-        public IEnumerable<GraphRoute> Traverse(string fromNode, string toNode)
+        public IEnumerable<GraphRoute> Traverse(string fromNode, string toNode, int maxEdgeCount)
         {
             if (!m_graph.NodeExists(fromNode))
             {
@@ -24,26 +24,24 @@ namespace Graphiti.Core
             {
                 throw new Exception($"Node: {toNode} does not exist.");
             }
-            return Traverse(fromNode, toNode, new List<string>());
+            return TraverseRecursive(fromNode, toNode, maxEdgeCount);
         }
 
-        private IEnumerable<GraphRoute> Traverse(string fromNode, string toNode, IEnumerable<string> visitedNodes)
+        private IEnumerable<GraphRoute> TraverseRecursive(string fromNode, string toNode, int maxEdgeCount)
         {
+            if (maxEdgeCount == 0)
+            {
+                return Enumerable.Empty<GraphRoute>();
+            }
+
             var neighbors = m_graph.GetNeighbors(fromNode);
 
-            IList<GraphRoute> result = neighbors
-                .Where(neighbor => neighbor.ToNode != toNode && !visitedNodes.Contains(neighbor.ToNode))
-                .Select(edge => Traverse(edge.ToNode, toNode, visitedNodes.Concat(new[] { fromNode }))
-                .Select(route => route.AppendToStart(edge)))
+            IEnumerable<GraphRoute> result = neighbors
+                .Select(edge => TraverseRecursive(edge.ToNode, toNode, maxEdgeCount - 1)
+                                .Select(route => route.AppendToStart(edge)))
                 .SelectMany(flat => flat)
-                .ToList();
+                .Concat(neighbors.Where(x => x.ToNode == toNode).Select(y => new GraphRoute(y)));
 
-            IEnumerable<GraphEdge> directPath = neighbors.Where(x => x.ToNode == toNode);
-
-            if (directPath.Any())
-            {
-                result.Add(new GraphRoute(directPath));
-            }
             return result;
         }
     }

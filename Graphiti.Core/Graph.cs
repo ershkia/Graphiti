@@ -73,6 +73,11 @@ namespace Graphiti.Core
             return m_nodes.Keys.ToList();
         }
 
+        public IEnumerable<GraphEdge> GetEdges()
+        {
+            return m_nodes.Values.SelectMany(flat => flat);
+        }
+
         public IReadOnlyCollection<GraphEdge> GetNeighbors(string node)
         {
             if (!NodeExists(node))

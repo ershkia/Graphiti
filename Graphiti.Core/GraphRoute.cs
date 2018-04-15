@@ -12,6 +12,7 @@ namespace Graphiti.Core
         {
             this.m_edges = edges.ToArray();
         }
+        public GraphRoute(GraphEdge edge) : this(new[] { edge }) { }
 
         public GraphRoute AppendToStart(GraphEdge y)
         {
