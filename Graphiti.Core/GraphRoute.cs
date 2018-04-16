@@ -50,6 +50,10 @@ namespace Graphiti.Core
             return true;
         }
 
+        public IReadOnlyCollection<GraphEdge> GetEdges(){
+            return m_edges;
+        }
+
         public override int GetHashCode()
         {
             return this.m_edges.GetHashCode() * this.m_edges.GetHashCode();
