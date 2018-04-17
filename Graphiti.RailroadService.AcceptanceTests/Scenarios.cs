@@ -9,22 +9,30 @@ namespace Graphiti.RailroadService.AcceptanceTests
     [TestClass]
     public class Scenarios
     {
-        [DataTestMethod]
-        [DataRow("AB5 BC4 CD8 DC8 DE6 AD5 CE2 EB3 AE7", "ABC", 9)]
-        [DataRow("AB5 BC4 CD8 DC8 DE6 AD5 CE2 EB3 AE7", "AD", 5)]
-        [DataRow("AB5 BC4 CD8 DC8 DE6 AD5 CE2 EB3 AE7", "ADC", 13)]
-        [DataRow("AB5 BC4 CD8 DC8 DE6 AD5 CE2 EB3 AE7", "AEBCD", 22)]
-        [DataRow("AB5 BC4 CD8 DC8 DE6 AD5 CE2 EB3 AE7", "AED", -1)]
-        public void CalculateDistance(string graphSrt, string stopsStr, float expectedDistance)
+        private static MapQuery m_mapQuery;
+
+        [ClassInitialize]
+        public static void Setup(TestContext context)
         {
-            Graph graph = new GraphLoader().Load(graphSrt);
-            RouteQuery routeQuery = new RouteQuery(graph);
+            Graph map = new GraphLoader().Load("AB5, BC4, CD8, DC8, DE6, AD5, CE2, EB3, AE7");
+            m_mapQuery = new MapQuery(map);
+
+        }
+
+        [DataTestMethod]
+        [DataRow("ABC", 9)]
+        [DataRow("AD", 5)]
+        [DataRow("ADC", 13)]
+        [DataRow("AEBCD", 22)]
+        [DataRow("AED", -1)]
+        public void CalculateDistance(string stopsStr, float expectedDistance)
+        {
             var stops = stopsStr.ToCharArray().Select(x => x.ToString());
             float result;
 
             try
             {
-                result = routeQuery.CalculateDistance(stops);
+                result = m_mapQuery.GetTotalDistance(stops);
             }
             catch (RouteNotFoundException)
             {
@@ -34,50 +42,39 @@ namespace Graphiti.RailroadService.AcceptanceTests
         }
 
         [DataTestMethod]
-        [DataRow("AB5 BC4 CD8 DC8 DE6 AD5 CE2 EB3 AE7", "C", "C", null, 3, 2)]
-        [DataRow("AB5 BC4 CD8 DC8 DE6 AD5 CE2 EB3 AE7", "A", "C", 4, 4, 3)]
-        public void FindTripsWithStops(
-            string graphSrt,
+        [DataRow("C", "C", null, 3, 2)]
+        [DataRow("A", "C", 4, 4, 3)]
+        public void FindTripsWithGivenNumberOfStops(
             string from,
             string to,
             int? minStops,
             int maxStops,
             int expectedTripCount)
         {
-            Graph graph = new GraphLoader().Load(graphSrt);
-            RouteQuery routeQuery = new RouteQuery(graph);
-
-            var routes = routeQuery.GetAllRoutes(from, to, minStops, maxStops);
+            var routes = m_mapQuery.GetRoutesByStopCount(from, to, minStops, maxStops);
 
             Assert.AreEqual(expectedTripCount, routes.Count());
         }
 
         [DataTestMethod]
-        [DataRow("AB5 BC4 CD8 DC8 DE6 AD5 CE2 EB3 AE7", "A", "C", 9)]
-        [DataRow("AB5 BC4 CD8 DC8 DE6 AD5 CE2 EB3 AE7", "B", "B", 9)]
-        public void FindTripsWithMinStops(string graphSrt, string from, string to, float expectedDistance)
+        [DataRow("A", "C", 9)]
+        [DataRow("B", "B", 9)]
+        public void FindTripsWithMinStops(string from, string to, float expectedDistance)
         {
-            Graph graph = new GraphLoader().Load(graphSrt);
-            RouteQuery routeQuery = new RouteQuery(graph);
-
-            var route = routeQuery.GetRouteWithMinStops(from, to);
+            var route = m_mapQuery.GetRouteWithMinStops(from, to);
 
             Assert.AreEqual(expectedDistance, route.GetTotalWeight());
         }
 
         [DataTestMethod]
-        [DataRow("AB5 BC4 CD8 DC8 DE6 AD5 CE2 EB3 AE7", "C", "C", 29, 7)]
+        [DataRow("C", "C", 29, 7)]
         public void FindTripsShorterThanGiventDistance(
-            string graphSrt,
             string from,
             string to,
             float maxDistance,
             int expectedRouteCount)
         {
-            Graph graph = new GraphLoader().Load(graphSrt);
-            RouteQuery routeQuery = new RouteQuery(graph);
-
-            var routes = routeQuery.GetRoutes(from, to, maxDistance);
+            var routes = m_mapQuery.GetRoutesByDistance(from, to, maxDistance);
             Assert.AreEqual(expectedRouteCount, routes.Count());
         }
     }

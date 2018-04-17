@@ -12,7 +12,7 @@ namespace Graphiti.UnitTests
         public void Load()
         {
             GraphLoader graphLoader = new GraphLoader();
-            Graph graph = graphLoader.Load("AB200 BC100 ");
+            Graph graph = graphLoader.Load("AB200, BC100 ");
             Assert.IsNotNull(graph);
             var nodes = graph.GetNodes();
 
@@ -25,5 +25,7 @@ namespace Graphiti.UnitTests
             Assert.AreEqual("B", neighbors[0].ToNode);
             Assert.AreEqual(200, neighbors[0].Weight);
         }
+
+        //TODO tests for invalid inputs
     }
 }

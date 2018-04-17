@@ -83,5 +83,6 @@ namespace Graphiti.UnitTests
             Assert.ThrowsException<Exception>(() => graph.AddEdge("A", "B", 300));
         }
 
+        //TODO Tests for other public methods.
     }
 }

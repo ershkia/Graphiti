@@ -9,16 +9,18 @@ namespace Graphiti.Core
     {
         public Graph Load(string input)
         {
-            string pattern = @"\w+";
-            Regex r = new Regex(pattern, RegexOptions.IgnoreCase);
-            Match match = r.Match(input);
+            if (string.IsNullOrEmpty(input))
+            {
+                throw new Exception("input is not specified.");
+            }
 
             Graph graph = new Graph();
 
-            while (match.Success)
+            string[] edges = input.Split(',');
+
+            foreach (string edge in edges)
             {
-                AddEdge(graph, match.Value);
-                match = match.NextMatch();
+                AddEdge(graph, edge.Trim());
             }
 
             return graph;
@@ -42,7 +44,7 @@ namespace Graphiti.Core
             }
             else
             {
-                throw new Exception($"Invalid Edge: {edge}");
+                throw new Exception($"Invalid Edge: {edge}.");
             }
         }
     }

@@ -25,11 +25,6 @@ namespace Graphiti.Core
             m_nodes.AddOrUpdate(node, noNeighbors, (key, value) => noNeighbors);
         }
 
-        public void AddEdge(GraphEdge edge)
-        {
-            AddEdge(edge.FromNode, edge.ToNode, edge.Weight);
-        }
-
         public bool TryGetEdge(string from, string to, out GraphEdge edge)
         {
             edge = null;
@@ -39,6 +34,11 @@ namespace Graphiti.Core
             }
             edge = m_nodes[from].FirstOrDefault(x => x.ToNode == to);
             return edge != null;
+        }
+
+        public void AddEdge(GraphEdge edge)
+        {
+            AddEdge(edge.FromNode, edge.ToNode, edge.Weight);
         }
 
         public void AddEdge(string fromNode, string toNode, float weight)

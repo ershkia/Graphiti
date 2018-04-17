@@ -5,14 +5,14 @@ using Graphiti.Core;
 
 namespace Graphiti.RailroadService
 {
-    public class RouteQuery
+    public class MapQuery
     {
         private readonly Graph m_map;
-        public RouteQuery(Graph map)
+        public MapQuery(Graph map)
         {
             m_map = map;
         }
-        public float CalculateDistance(IEnumerable<string> stops)
+        public float GetTotalDistance(IEnumerable<string> stops)
         {
             string from = null;
             string to = null;
@@ -34,15 +34,21 @@ namespace Graphiti.RailroadService
             return distance;
         }
 
-        public IEnumerable<GraphRoute> GetAllRoutes(string from, string to, int? minStops, int maxStops)
+        public IEnumerable<GraphRoute> GetRoutesByStopCount(string from, string to, int? minStops, int maxStops)
         {
             GraphTraverser traverser = new GraphTraverser(m_map);
             var allRoutes = traverser.TraverseByStops(from, to, maxStops);
             return allRoutes.Where(x =>
             {
                 int stops = x.GetEdgeCount();
-                return (minStops == null || stops >= minStops.Value) && (stops <= maxStops);
+                return (minStops == null || stops >= minStops.Value);
             });
+        }
+
+        public IEnumerable<GraphRoute> GetRoutesByDistance(string from, string to, float maxTotalDistance)
+        {
+            GraphTraverser traverser = new GraphTraverser(m_map);
+            return traverser.TraverseByWeight(from, to, maxTotalDistance);
         }
 
         public GraphRoute GetRouteWithMinStops(string from, string to)
@@ -57,12 +63,5 @@ namespace Graphiti.RailroadService
             }
             return allRoutes.OrderBy(x => x.GetTotalWeight()).First();
         }
-
-        public IEnumerable<GraphRoute> GetRoutes(string from, string to, float maxTotalDistance)
-        {
-            GraphTraverser traverser = new GraphTraverser(m_map);
-            return traverser.TraverseByWeight(from, to, maxTotalDistance);
-        }
-
     }
 }

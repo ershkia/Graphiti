@@ -1,16 +1,17 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace Graphiti.Core
 {
     public class GraphRoute
     {
-        private GraphEdge[] m_edges;
+        private IEnumerable<GraphEdge> m_edges;
 
         public GraphRoute(IEnumerable<GraphEdge> edges)
         {
-            this.m_edges = edges.ToArray();
+            this.m_edges = edges;
         }
         public GraphRoute(GraphEdge edge) : this(new[] { edge }) { }
 
@@ -42,7 +43,7 @@ namespace Graphiti.Core
             }
             for (int i = 0; i < m_edges.Count(); i++)
             {
-                if (!m_edges[i].Equals(other.m_edges[i]))
+                if (!m_edges.ElementAt(i).Equals(other.m_edges.ElementAt(i)))
                 {
                     return false;
                 }
@@ -51,7 +52,7 @@ namespace Graphiti.Core
         }
 
         public IReadOnlyCollection<GraphEdge> GetEdges(){
-            return m_edges;
+            return m_edges.ToList().AsReadOnly();
         }
 
         public override int GetHashCode()
